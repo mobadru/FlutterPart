@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'login_screen.dart';
 
 
 
 class ProfileScreen extends StatefulWidget {
 
-
   const ProfileScreen({super.key});
-
 
 
   @override
   State<ProfileScreen> createState() =>
       _ProfileScreenState();
 
-
 }
+
 
 
 
@@ -30,7 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
 
-
   @override
   void initState(){
 
@@ -39,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
     loadProfile();
 
   }
+
 
 
 
@@ -56,11 +55,9 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
       setState((){
 
-
         profile = data;
 
         loading = false;
-
 
       });
 
@@ -74,22 +71,20 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
       setState((){
 
-
         loading=false;
-
 
       });
 
 
 
       ScaffoldMessenger.of(context)
-      .showSnackBar(
+          .showSnackBar(
 
         SnackBar(
 
           content:
           Text(
-            e.toString()
+              e.toString()
           ),
 
         ),
@@ -106,13 +101,51 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
 
+  Future<void> logout() async{
+
+
+    await ApiService.logout();
+
+
+
+    Navigator.pushAndRemoveUntil(
+
+
+      context,
+
+
+      MaterialPageRoute(
+
+        builder: (_) =>
+        const LoginScreen(),
+
+      ),
+
+
+          (route)=>false,
+
+
+    );
+
+
+  }
+
+
+
+
+
 
 
   Widget profileCard(
+
       IconData icon,
+
       String title,
+
       String value
-  ){
+
+      ){
+
 
 
     return Card(
@@ -121,9 +154,21 @@ class _ProfileScreenState extends State<ProfileScreen>{
       elevation:3,
 
 
+      shape:
+      RoundedRectangleBorder(
+
+        borderRadius:
+        BorderRadius.circular(15),
+
+      ),
+
+
+
       margin:
       const EdgeInsets.only(
-        bottom:12
+
+          bottom:12
+
       ),
 
 
@@ -133,12 +178,24 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
         leading:
-        Icon(
+        CircleAvatar(
 
-          icon,
 
-          color:
-          const Color(0xff0A66FF),
+          backgroundColor:
+          const Color(0xff0A66FF)
+              .withOpacity(.1),
+
+
+          child:
+          Icon(
+
+            icon,
+
+            color:
+            const Color(0xff0A66FF),
+
+          ),
+
 
         ),
 
@@ -169,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
           style:
           const TextStyle(
 
-            fontSize:16
+            fontSize:16,
 
           ),
 
@@ -190,6 +247,9 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
 
+
+
+
   @override
   Widget build(BuildContext context){
 
@@ -197,18 +257,24 @@ class _ProfileScreenState extends State<ProfileScreen>{
     return Scaffold(
 
 
-      appBar:
 
+      appBar:
       AppBar(
+
 
         title:
         const Text(
-          "My Profile"
+
+          "My Profile",
+
         ),
+
 
         centerTitle:true,
 
+
       ),
+
 
 
 
@@ -220,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
       loading
 
 
-      ?
+          ?
 
 
       const Center(
@@ -232,11 +298,12 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
 
-      :
+          :
 
 
 
       SingleChildScrollView(
+
 
 
         padding:
@@ -244,20 +311,27 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
 
+
         child:
         Column(
+
 
 
           children:[
 
 
 
+
+
             const CircleAvatar(
 
-              radius:55,
+
+              radius:60,
+
 
               backgroundColor:
               Color(0xff0A66FF),
+
 
 
               child:
@@ -265,50 +339,57 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
                 Icons.person,
 
+                size:70,
+
                 color:
                 Colors.white,
 
-                size:65,
-
               ),
 
+
             ),
 
 
 
 
-            const SizedBox(
-              height:15
-            ),
+
+
+            const SizedBox(height:15),
+
 
 
 
 
             Text(
 
-              profile!["username"]
-              ??
-              "Patient",
+
+              profile?["username"]
+                  ??
+                  "Patient",
+
 
 
               style:
               const TextStyle(
 
-                fontSize:22,
+
+                fontSize:24,
+
 
                 fontWeight:
                 FontWeight.bold,
 
+
               ),
 
+
             ),
 
 
 
 
-            const SizedBox(
-              height:25
-            ),
+
+            const SizedBox(height:30),
 
 
 
@@ -320,8 +401,10 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
               "User ID",
 
-              profile!["id"]
-              .toString(),
+              profile?["id"]
+                  ?.toString()
+                  ??
+                  "-",
 
             ),
 
@@ -336,11 +419,12 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
               "Username",
 
-              profile!["username"]
-              ??
-              "",
+              profile?["username"]
+                  ??
+                  "-",
 
             ),
+
 
 
 
@@ -352,11 +436,12 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
               "Email",
 
-              profile!["email"]
-              ??
-              "",
+              profile?["email"]
+                  ??
+                  "-",
 
             ),
+
 
 
 
@@ -368,11 +453,115 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
               "Role",
 
-              profile!["role"]
-              ??
-              "patient",
+              profile?["role"]
+                  ??
+                  "patient",
 
             ),
+
+
+
+
+
+
+
+            const SizedBox(height:20),
+
+
+
+
+
+
+            SizedBox(
+
+
+              width:
+              double.infinity,
+
+
+
+              child:
+              ElevatedButton.icon(
+
+
+
+                icon:
+                const Icon(
+
+                  Icons.logout,
+
+                  color:
+                  Colors.white,
+
+                ),
+
+
+
+
+                label:
+                const Text(
+
+                  "Logout",
+
+                  style:
+                  TextStyle(
+
+                    color:
+                    Colors.white,
+
+                    fontSize:17,
+
+                  ),
+
+                ),
+
+
+
+
+
+                style:
+                ElevatedButton.styleFrom(
+
+
+
+                  backgroundColor:
+                  Colors.red,
+
+
+
+                  padding:
+                  const EdgeInsets.all(15),
+
+
+
+                  shape:
+                  RoundedRectangleBorder(
+
+
+                    borderRadius:
+                    BorderRadius.circular(15),
+
+
+                  ),
+
+
+
+                ),
+
+
+
+
+
+                onPressed:
+                logout,
+
+
+
+              ),
+
+
+            ),
+
 
 
 
@@ -383,6 +572,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
 
 
       ),
+
 
 
 

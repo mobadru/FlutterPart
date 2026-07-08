@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../services/api_service.dart';
-
 import 'medicines_screen.dart';
 import 'pharmacy_screen.dart';
 import 'reservation_screen.dart';
 import 'profile_screen.dart';
 
 
-
 class DashboardScreen extends StatefulWidget {
 
-  const DashboardScreen({super.key});
+  const DashboardScreen({
+    super.key
+  });
 
 
   @override
@@ -22,284 +21,154 @@ class DashboardScreen extends StatefulWidget {
 
 
 
-class _DashboardScreenState extends State<DashboardScreen>{
+class _DashboardScreenState extends State<DashboardScreen> {
 
 
-int index = 0;
+  int index = 0;
 
 
 
-final pages = [
+  final List<Widget> pages = const [
 
-const HomeDashboard(),
 
-const MedicinesScreen(),
+    HomeDashboard(),
 
-const PharmacyScreen(),
+    MedicinesScreen(),
 
-const ReservationScreen(),
+    PharmacyScreen(),
 
-const ProfileScreen(),
+    ReservationScreen(),
 
-];
+    ProfileScreen(),
 
 
+  ];
 
-@override
-Widget build(BuildContext context){
 
 
-return Scaffold(
 
 
-body: pages[index],
+  @override
+  Widget build(BuildContext context) {
 
 
+    return Scaffold(
 
-bottomNavigationBar:
-BottomNavigationBar(
 
+      body:
+      pages[index],
 
-currentIndex:index,
 
 
-type:BottomNavigationBarType.fixed,
+      bottomNavigationBar:
+      BottomNavigationBar(
 
 
-selectedItemColor:
-const Color(0xff0A66FF),
+        currentIndex:index,
 
 
+        selectedItemColor:
+        const Color(0xff0A66FF),
 
-onTap:(value){
 
+        unselectedItemColor:
+        Colors.grey,
 
-setState((){
 
+        type:
+        BottomNavigationBarType.fixed,
 
-index=value;
 
 
-});
+        onTap:(value){
 
 
-},
+          setState(() {
 
 
+            index=value;
 
-items:const[
 
+          });
 
-BottomNavigationBarItem(
 
-icon:Icon(Icons.home),
+        },
 
-label:"Home"
 
-),
 
+        items:[
 
 
-BottomNavigationBarItem(
+          const BottomNavigationBarItem(
 
-icon:Icon(Icons.medication),
+            icon:
+            Icon(Icons.home),
 
-label:"Medicine"
+            label:
+            "Home",
 
-),
+          ),
 
 
 
-BottomNavigationBarItem(
+          const BottomNavigationBarItem(
 
-icon:Icon(Icons.local_pharmacy),
+            icon:
+            Icon(Icons.medication),
 
-label:"Pharmacy"
+            label:
+            "Medicine",
 
-),
+          ),
 
 
 
-BottomNavigationBarItem(
+          const BottomNavigationBarItem(
 
-icon:Icon(Icons.event),
+            icon:
+            Icon(Icons.local_pharmacy),
 
-label:"Reservation"
+            label:
+            "Pharmacy",
 
-),
+          ),
 
 
 
-BottomNavigationBarItem(
+          const BottomNavigationBarItem(
 
-icon:Icon(Icons.person),
+            icon:
+            Icon(Icons.event_note),
 
-label:"Profile"
+            label:
+            "Reservation",
 
-),
+          ),
 
 
-],
 
+          const BottomNavigationBarItem(
 
-),
+            icon:
+            Icon(Icons.person),
 
+            label:
+            "Profile",
 
-);
+          ),
 
 
-}
 
+        ],
 
 
-}
+      ),
 
 
+    );
 
 
-
-
-
-
-
-class HomeDashboard extends StatefulWidget{
-
-
-const HomeDashboard({super.key});
-
-
-
-@override
-State<HomeDashboard> createState() =>
-_HomeDashboardState();
-
-
-
-}
-
-
-
-class _HomeDashboardState extends State<HomeDashboard>{
-
-
-
-Map<String,dynamic>? profile;
-
-
-List reservations=[];
-
-
-bool loading=true;
-
-
-
-
-@override
-void initState(){
-
-super.initState();
-
-loadDashboard();
-
-
-}
-
-
-
-
-
-Future<void> loadDashboard() async{
-
-
-try{
-
-
-final user =
-await ApiService.getProfile();
-
-
-
-final myReservations =
-await ApiService.getMyReservations();
-
-
-
-setState((){
-
-
-profile=user;
-
-
-reservations=myReservations;
-
-
-loading=false;
-
-
-});
-
-
-
-}
-
-catch(e){
-
-
-print(e);
-
-
-setState((){
-
-
-loading=false;
-
-
-});
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-Color getStatusColor(String status){
-
-
-switch(status.toLowerCase()){
-
-
-case "approved":
-
-return Colors.green;
-
-
-
-case "rejected":
-
-return Colors.red;
-
-
-
-case "completed":
-
-return Colors.blue;
-
-
-
-default:
-
-return Colors.orange;
-
-
-}
-
+  }
 
 
 }
@@ -310,531 +179,617 @@ return Colors.orange;
 
 
 
+// ================= HOME DASHBOARD =================
 
-@override
-Widget build(BuildContext context){
 
+class HomeDashboard extends StatelessWidget {
 
 
-return Scaffold(
+  const HomeDashboard({
+    super.key
+  });
 
 
-backgroundColor:
-Colors.grey.shade100,
 
+  @override
+  Widget build(BuildContext context) {
 
 
-appBar:AppBar(
+    return Scaffold(
 
-title:
-const Text(
-"Patient Dashboard"
-),
 
-centerTitle:true,
+      appBar:AppBar(
 
-),
 
+        title:
+        const Text(
 
+          "Patient Dashboard",
 
+        ),
 
-body:
 
 
-loading
+        centerTitle:true,
 
-?
 
-const Center(
+      ),
 
-child:CircularProgressIndicator()
 
-)
 
 
 
-:
+      body:
+      SingleChildScrollView(
 
-RefreshIndicator(
 
+        padding:
+        const EdgeInsets.all(15),
 
-onRefresh:loadDashboard,
 
 
+        child:
+        Column(
 
-child:SingleChildScrollView(
 
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
 
-physics:
-const AlwaysScrollableScrollPhysics(),
 
 
+          children:[
 
-padding:
-const EdgeInsets.all(16),
 
 
+            // WELCOME CARD
 
-child:Column(
 
+            Container(
 
-crossAxisAlignment:
-CrossAxisAlignment.start,
 
+              width:
+              double.infinity,
 
 
-children:[
+              padding:
+              const EdgeInsets.all(20),
 
 
 
+              decoration:
+              BoxDecoration(
 
-Container(
 
+                borderRadius:
+                BorderRadius.circular(20),
 
-width:double.infinity,
 
+                gradient:
+                const LinearGradient(
 
-padding:
-const EdgeInsets.all(22),
+                  colors:[
 
+                    Color(0xff0A66FF),
 
+                    Color(0xff4D9BFF),
 
-decoration:
-BoxDecoration(
+                  ],
 
-gradient:
-const LinearGradient(
+                ),
 
-colors:[
 
-Color(0xff0A66FF),
+              ),
 
-Color(0xff0047AB)
 
-]
 
-),
 
+              child:
+              const Column(
 
-borderRadius:
-BorderRadius.circular(20)
 
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
 
-),
 
+                children:[
 
 
-child:Column(
+                  Text(
 
+                    "Welcome Customer",
 
-crossAxisAlignment:
-CrossAxisAlignment.start,
+                    style:
+                    TextStyle(
 
+                      color:
+                      Colors.white,
 
-children:[
+                      fontSize:22,
 
+                      fontWeight:
+                      FontWeight.bold,
 
-Text(
+                    ),
 
-"Welcome ${profile?["username"] ?? "Patient"}",
+                  ),
 
-style:
-const TextStyle(
 
-color:Colors.white,
 
-fontSize:23,
+                  SizedBox(height:8),
 
-fontWeight:FontWeight.bold
 
-),
 
-),
+                  Text(
 
+                    "Find medicine and reserve easily",
 
+                    style:
+                    TextStyle(
 
-const SizedBox(height:8),
+                      color:
+                      Colors.white,
 
+                    ),
 
+                  ),
 
 
-const Text(
+                ],
 
-"Manage your medicines and reservations easily",
 
-style:
-TextStyle(
+              ),
 
-color:Colors.white70,
 
-fontSize:15
+            ),
 
-),
 
-),
 
 
 
-],
+            const SizedBox(height:25),
 
 
-),
 
 
-),
 
+            const Text(
 
+              "Services",
 
+              style:
+              TextStyle(
 
+                fontSize:20,
 
-const SizedBox(height:20),
+                fontWeight:
+                FontWeight.bold,
 
+              ),
 
+            ),
 
 
 
-Row(
 
+            const SizedBox(height:15),
 
-children:[
 
 
 
-Expanded(
 
-child:
-DashboardCard(
+            Row(
 
-icon:
-Icons.medication,
 
-title:
-"Medicines",
+              children:[
 
-number:
-"Find",
 
-)
 
-),
+                Expanded(
 
 
+                  child:
+                  DashboardCard(
 
 
-const SizedBox(width:15),
+                    title:
+                    "Medicines",
 
 
+                    number:
+                    "Search",
 
 
-Expanded(
+                    icon:
+                    Icons.medication,
 
-child:
-DashboardCard(
 
-icon:
-Icons.event,
 
-title:
-"My Reservations",
+                    onTap:(){
 
-number:
-reservations.length.toString(),
 
-)
+                      Navigator.push(
 
-),
+                        context,
 
+                        MaterialPageRoute(
 
+                          builder:(context)=>
+                          const MedicinesScreen(),
 
-],
+                        ),
 
+                      );
 
 
-),
+                    },
 
 
+                  ),
 
 
+                ),
 
-const SizedBox(height:25),
 
 
 
 
+                const SizedBox(width:15),
 
-const Text(
 
-"Recent Reservations",
 
-style:
-TextStyle(
 
-fontSize:20,
 
-fontWeight:FontWeight.bold
+                Expanded(
 
-),
 
-),
+                  child:
+                  DashboardCard(
 
 
+                    title:
+                    "Reservations",
 
 
-const SizedBox(height:10),
+                    number:
+                    "My List",
 
 
+                    icon:
+                    Icons.event_note,
 
 
 
+                    onTap:(){
 
-reservations.isEmpty
 
-?
+                      Navigator.push(
 
-const Center(
+                        context,
 
-child:Text(
-"No reservation found"
-)
+                        MaterialPageRoute(
 
-)
+                          builder:(context)=>
+                          const ReservationScreen(),
 
+                        ),
 
+                      );
 
-:
 
-ListView.builder(
+                    },
 
 
-shrinkWrap:true,
+                  ),
 
 
-physics:
-const NeverScrollableScrollPhysics(),
 
+                ),
 
 
-itemCount:
-reservations.length > 5
-?
-5
-:
-reservations.length,
 
+              ],
 
 
-itemBuilder:(context,index){
+            ),
 
 
 
-final item =
-reservations[index];
 
 
+            const SizedBox(height:15),
 
-return Card(
 
 
-elevation:3,
 
 
-margin:
-const EdgeInsets.only(
-bottom:12
-),
+            Row(
 
 
+              children:[
 
-shape:
-RoundedRectangleBorder(
 
-borderRadius:
-BorderRadius.circular(15)
 
-),
+                Expanded(
 
 
+                  child:
+                  DashboardCard(
 
-child:
-ListTile(
 
+                    title:
+                    "Pharmacy",
 
 
-leading:
-const CircleAvatar(
+                    number:
+                    "Nearby",
 
-backgroundColor:
-Color(0xff0A66FF),
 
-child:
-Icon(
+                    icon:
+                    Icons.local_pharmacy,
 
-Icons.medication,
 
-color:Colors.white
 
-)
+                    onTap:(){
 
-),
 
+                      Navigator.push(
 
+                        context,
 
-title:
-Text(
+                        MaterialPageRoute(
 
-item["product_name"] ??
-"Medicine",
+                          builder:(context)=>
+                          const PharmacyScreen(),
 
-style:
-const TextStyle(
+                        ),
 
-fontWeight:
-FontWeight.bold
+                      );
 
-),
 
-),
+                    },
 
 
+                  ),
 
 
-subtitle:
-Column(
+                ),
 
-crossAxisAlignment:
-CrossAxisAlignment.start,
 
-children:[
 
 
-Text(
 
-item["pharmacy_name"] ??
-"Pharmacy"
+                const SizedBox(width:15),
 
-),
 
 
 
-Text(
 
-item["reservation_date"] ??
-""
+                Expanded(
 
-)
 
+                  child:
+                  DashboardCard(
 
-],
 
-),
+                    title:
+                    "Profile",
 
 
+                    number:
+                    "Account",
 
 
+                    icon:
+                    Icons.person,
 
-trailing:
-Container(
 
 
-padding:
-const EdgeInsets.symmetric(
+                    onTap:(){
 
-horizontal:10,
 
-vertical:5
+                      Navigator.push(
 
-),
+                        context,
 
+                        MaterialPageRoute(
 
-decoration:
-BoxDecoration(
+                          builder:(context)=>
+                          const ProfileScreen(),
 
-color:
-getStatusColor(
+                        ),
 
-item["status"]
+                      );
 
-)
-.withOpacity(.15),
 
+                    },
 
-borderRadius:
-BorderRadius.circular(20)
 
-),
+                  ),
 
 
+                ),
 
 
-child:
-Text(
 
-item["status"]
-.toString()
-.toUpperCase(),
+              ],
 
 
+            ),
 
-style:
-TextStyle(
 
-color:
-getStatusColor(
-item["status"]
-),
 
-fontWeight:
-FontWeight.bold
 
-),
+            const SizedBox(height:30),
 
-),
 
 
 
-),
 
+            const Text(
 
+              "Quick Actions",
 
-),
+              style:
+              TextStyle(
 
+                fontSize:20,
 
+                fontWeight:
+                FontWeight.bold,
 
-);
+              ),
 
+            ),
 
 
-},
 
 
 
+            const SizedBox(height:15),
 
-)
 
 
 
 
+            Card(
 
 
-],
+              child:
+              ListTile(
 
 
+                leading:
+                const Icon(
 
-),
+                  Icons.search,
 
+                  color:
+                  Color(0xff0A66FF),
 
-),
+                ),
 
 
-),
+                title:
+                const Text(
 
+                  "Find Medicine",
 
+                ),
 
-);
 
+                subtitle:
+                const Text(
 
+                  "Search available medicines",
 
-}
+                ),
+
+
+
+                onTap:(){
+
+
+                  Navigator.push(
+
+                    context,
+
+                    MaterialPageRoute(
+
+                      builder:(context)=>
+                      const MedicinesScreen(),
+
+                    ),
+
+                  );
+
+
+                },
+
+
+              ),
+
+
+            ),
+
+
+
+
+
+            Card(
+
+
+              child:
+              ListTile(
+
+
+                leading:
+                const Icon(
+
+                  Icons.history,
+
+                  color:
+                  Color(0xff0A66FF),
+
+                ),
+
+
+                title:
+                const Text(
+
+                  "My Reservations",
+
+                ),
+
+
+                subtitle:
+                const Text(
+
+                  "View reservation status",
+
+                ),
+
+
+
+                onTap:(){
+
+
+                  Navigator.push(
+
+                    context,
+
+                    MaterialPageRoute(
+
+                      builder:(context)=>
+                      const ReservationScreen(),
+
+                    ),
+
+                  );
+
+
+                },
+
+
+              ),
+
+
+            ),
+
+
+
+          ],
+
+
+        ),
+
+
+      ),
+
+
+    );
+
+
+  }
 
 
 
@@ -846,131 +801,188 @@ FontWeight.bold
 
 
 
+// ================= CARD =================
 
 
-class DashboardCard extends StatelessWidget{
+class DashboardCard extends StatelessWidget {
 
 
-final IconData icon;
+  final String title;
 
-final String title;
+  final String number;
 
-final String number;
+  final IconData icon;
 
+  final VoidCallback onTap;
 
 
-const DashboardCard({
 
-super.key,
 
-required this.icon,
+  const DashboardCard({
 
-required this.title,
+    super.key,
 
-required this.number
+    required this.title,
 
-});
+    required this.number,
 
+    required this.icon,
 
+    required this.onTap,
 
+  });
 
 
-@override
-Widget build(BuildContext context){
 
 
-return Container(
+  @override
+  Widget build(BuildContext context) {
 
 
-padding:
-const EdgeInsets.all(18),
 
+    return InkWell(
 
 
-decoration:
-BoxDecoration(
+      onTap:onTap,
 
-color:Colors.white,
 
-borderRadius:
-BorderRadius.circular(18),
+      borderRadius:
+      BorderRadius.circular(18),
 
-boxShadow:[
 
-BoxShadow(
 
-color:Colors.black12,
+      child:
+      Container(
 
-blurRadius:6
 
-)
+        padding:
+        const EdgeInsets.all(18),
 
-]
 
 
-),
+        decoration:
+        BoxDecoration(
 
 
+          color:
+          Colors.white,
 
-child:Column(
 
+          borderRadius:
+          BorderRadius.circular(18),
 
-children:[
 
 
-Icon(
+          boxShadow:[
 
-icon,
 
-size:35,
+            BoxShadow(
 
-color:
-const Color(0xff0A66FF)
+              color:
+              Colors.black12,
 
-),
+              blurRadius:
+              8,
 
+              offset:
+              const Offset(0,3),
 
+            )
 
-const SizedBox(height:10),
 
+          ],
 
 
+        ),
 
-Text(
 
-number,
 
-style:
-const TextStyle(
 
-fontSize:22,
+        child:
+        Column(
 
-fontWeight:FontWeight.bold
 
-),
+          children:[
 
-),
 
 
+            Icon(
 
+              icon,
 
-Text(title)
+              size:40,
 
+              color:
+              const Color(0xff0A66FF),
 
+            ),
 
-],
 
 
-),
 
+            const SizedBox(height:10),
 
 
-);
 
 
+            Text(
 
-}
+              number,
 
+              style:
+              const TextStyle(
+
+                fontSize:18,
+
+                fontWeight:
+                FontWeight.bold,
+
+              ),
+
+            ),
+
+
+
+
+
+            const SizedBox(height:5),
+
+
+
+
+
+            Text(
+
+              title,
+
+              style:
+              const TextStyle(
+
+                color:
+                Colors.grey,
+
+              ),
+
+            ),
+
+
+
+          ],
+
+
+
+        ),
+
+
+
+      ),
+
+
+
+    );
+
+
+  }
 
 
 }

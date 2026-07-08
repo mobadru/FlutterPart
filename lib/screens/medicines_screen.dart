@@ -27,7 +27,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
   final TextEditingController searchController =
-      TextEditingController();
+  TextEditingController();
+
 
 
 
@@ -42,9 +43,11 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
 
-  // ===============================
-  // LOAD MEDICINES FROM DJANGO
-  // ===============================
+
+
+  // ===========================
+  // LOAD + GROUP MEDICINES
+  // ===========================
 
   Future<void> loadMedicines() async {
 
@@ -57,12 +60,88 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
 
+      Map<String,dynamic> grouped = {};
+
+
+
+      for(var item in data){
+
+
+        String name =
+        item["product_name"]?.toString()
+            ?? "Unknown";
+
+
+
+        if(!grouped.containsKey(name)){
+
+
+          grouped[name] = {
+
+            "product":
+            item["product"],
+
+
+            "product_name":
+            name,
+
+
+            "prescription":
+            item["prescription"] ?? false,
+
+
+            "pharmacies":[]
+
+          };
+
+
+        }
+
+
+
+
+        grouped[name]["pharmacies"].add({
+
+
+          "pharmacy":
+          item["pharmacy"],
+
+
+          "pharmacy_name":
+          item["pharmacy_name"],
+
+
+          "pharmacy_location":
+          item["pharmacy_location"],
+
+
+          "latitude":
+          item["latitude"],
+
+
+          "longitude":
+          item["longitude"],
+
+
+        });
+
+
+
+      }
+
+
+
+
       setState((){
 
 
-        medicines = data;
+        medicines =
+        grouped.values.toList();
 
-        filtered = data;
+
+        filtered =
+        medicines;
+
 
         loading=false;
 
@@ -83,17 +162,17 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
       });
 
 
-
       ScaffoldMessenger.of(context)
-      .showSnackBar(
+          .showSnackBar(
 
         SnackBar(
 
-          content: Text(
-            e.toString()
+          content:
+          Text(
+              e.toString()
           ),
 
-        )
+        ),
 
       );
 
@@ -107,9 +186,11 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
 
-  // ===============================
+
+
+  // ===========================
   // SEARCH
-  // ===============================
+  // ===========================
 
   void searchMedicine(String value){
 
@@ -118,22 +199,21 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
       filtered =
-      medicines.where((m){
+          medicines.where((medicine){
 
 
-        String name =
-        m["product_name"]
-        .toString()
-        .toLowerCase();
+            return medicine["product_name"]
+                .toString()
+                .toLowerCase()
+                .contains(
+
+                value.toLowerCase()
+
+            );
 
 
+          }).toList();
 
-        return name.contains(
-          value.toLowerCase()
-        );
-
-
-      }).toList();
 
 
     });
@@ -145,205 +225,526 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
 
-  // ===============================
+
+
+  // ===========================
   // OPEN MAP
-  // ===============================
-     Future<void> openMap(double lat, double lng) async {
-  final url = Uri.parse(
-    "https://www.google.com/maps?q=$lat,$lng",
-  );
+  // ===========================
 
-  if (await canLaunchUrl(url)) {
-    await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    );
+  Future<void> openMap(
+      dynamic lat,
+      dynamic lng
+      ) async {
+
+
+    try{
+
+
+      final latitude =
+      double.parse(lat.toString());
+
+
+      final longitude =
+      double.parse(lng.toString());
+
+
+
+      final Uri url = Uri.parse(
+
+        "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude",
+
+      );
+
+
+
+      await launchUrl(
+
+        url,
+
+        mode:
+        LaunchMode.externalApplication,
+
+      );
+
+
+
+    }
+
+    catch(e){
+
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+
+          const SnackBar(
+
+            content:
+            Text(
+                "Invalid location"
+            ),
+
+          )
+
+      );
+
+
+    }
+
+
   }
-}
 
 
-  // ===============================
-  // RESERVATION DIALOG
-  // ===============================
+
+
+
+
+
+
+  // ===========================
+  // PHARMACY LIST
+  // ===========================
+
+  void showPharmacies(Map medicine){
+
+
+    showModalBottomSheet(
+
+        context: context,
+
+
+        builder:(context){
+
+
+          return Padding(
+
+            padding:
+            const EdgeInsets.all(15),
+
+
+            child:
+
+            ListView(
+
+
+              children:[
+
+
+
+                Text(
+
+                  medicine["product_name"],
+
+
+                  style:
+                  const TextStyle(
+
+                    fontSize:22,
+
+                    fontWeight:
+                    FontWeight.bold,
+
+                  ),
+
+                ),
+
+
+
+                const SizedBox(height:10),
+
+
+
+
+                Chip(
+
+                  backgroundColor:
+
+                  medicine["prescription"] == true
+
+                      ? Colors.red
+
+                      : Colors.green,
+
+
+
+                  label:
+
+                  Text(
+
+                    medicine["prescription"] == true
+
+                        ? "Prescription Required"
+
+                        : "No Prescription",
+
+
+                    style:
+                    const TextStyle(
+
+                      color:
+                      Colors.white,
+
+                    ),
+
+                  ),
+
+                ),
+
+
+
+
+                const SizedBox(height:15),
+
+
+
+
+
+                ...medicine["pharmacies"]
+                    .map<Widget>((pharmacy){
+
+
+                  return Card(
+
+                    child:
+
+                    ListTile(
+
+
+
+                      leading:
+
+                      const Icon(
+
+                        Icons.local_pharmacy,
+
+                        color:
+                        Colors.blue,
+
+                      ),
+
+
+
+                      title:
+
+                      Text(
+
+                        pharmacy["pharmacy_name"]
+                            .toString(),
+
+                      ),
+
+
+
+                      subtitle:
+
+                      Text(
+
+                        pharmacy["pharmacy_location"]
+                            .toString(),
+
+                      ),
+
+
+
+                      trailing:
+
+                      IconButton(
+
+                        icon:
+
+                        const Icon(
+
+                          Icons.map,
+
+                          color:
+                          Colors.green,
+
+                        ),
+
+
+
+                        onPressed:(){
+
+
+                          openMap(
+
+                            pharmacy["latitude"],
+
+                            pharmacy["longitude"],
+
+
+                          );
+
+
+                        },
+
+                      ),
+
+
+
+
+
+                      onTap:(){
+
+
+                        Navigator.pop(context);
+
+
+                        reserveDialog({
+
+                          "product":
+                          medicine["product"],
+
+
+                          "pharmacy":
+                          pharmacy["pharmacy"],
+
+
+                          "product_name":
+                          medicine["product_name"],
+
+
+                        });
+
+
+
+                      },
+
+
+                    ),
+
+
+                  );
+
+
+                }).toList(),
+
+
+
+              ],
+
+
+            ),
+
+
+          );
+
+
+        }
+
+    );
+
+
+  }
+
+
+
+
+
+
+
+
+  // ===========================
+  // RESERVATION
+  // ===========================
 
   void reserveDialog(Map medicine){
 
 
-
-    TextEditingController quantityController =
+    TextEditingController quantity =
     TextEditingController();
 
 
 
     showDialog(
 
-      context: context,
+        context:context,
 
 
-      builder:(context){
+        builder:(context){
 
 
-        return AlertDialog(
+          return AlertDialog(
 
 
-          title: Text(
+            title:
 
-            "Reserve ${medicine["product_name"]}"
+            Text(
 
-          ),
-
-
-
-          content: TextField(
-
-
-            controller:
-            quantityController,
-
-
-            keyboardType:
-            TextInputType.number,
-
-
-            decoration:
-            const InputDecoration(
-
-              labelText:
-              "Quantity"
+              "Reserve ${medicine["product_name"]}",
 
             ),
 
 
-          ),
+
+            content:
+
+            TextField(
+
+              controller:
+              quantity,
 
 
+              keyboardType:
+              TextInputType.number,
 
-          actions:[
 
+              decoration:
 
+              const InputDecoration(
 
-            TextButton(
+                labelText:
+                "Quantity",
 
-              onPressed:(){
-
-                Navigator.pop(context);
-
-              },
-
-              child:
-              const Text("Cancel"),
+              ),
 
             ),
 
 
 
 
-
-            ElevatedButton(
-
-
-              child:
-              const Text("Reserve"),
+            actions:[
 
 
 
-              onPressed:() async{
+              TextButton(
+
+                  onPressed:(){
+
+                    Navigator.pop(context);
+
+                  },
 
 
-                int qty =
-                int.parse(
-                  quantityController.text
-                );
+                  child:
+                  const Text(
+                      "Cancel"
+                  )
 
-
-
-                try{
-
-
-                  await ApiService.reserveMedicine(
-
-                    medicine["product"],
-
-                    medicine["pharmacy"],
-
-                    qty,
-
-                    DateTime.now()
-                    .add(
-                      const Duration(days:2)
-                    )
-                    .toIso8601String(),
-
-                  );
+              ),
 
 
 
-                  Navigator.pop(context);
+
+              ElevatedButton(
+
+
+                  child:
+                  const Text(
+                      "Reserve"
+                  ),
 
 
 
-                  ScaffoldMessenger.of(context)
-                  .showSnackBar(
 
-                    const SnackBar(
-
-                      content:
-                      Text(
-                        "Reservation sent successfully"
-                      ),
-
-                      backgroundColor:
-                      Colors.green,
-
-                    )
-
-                  );
+                  onPressed:() async{
 
 
-                }
-
-                catch(e){
+                    try{
 
 
-                  ScaffoldMessenger.of(context)
-                  .showSnackBar(
-
-                    SnackBar(
-
-                      content:
-                      Text(
-                        e.toString()
-                      ),
-
-                    )
-
-                  );
+                      await ApiService.reserveMedicine(
 
 
-                }
+                        int.parse(
+                            medicine["product"].toString()
+                        ),
 
 
 
-              },
+                        int.parse(
+                            medicine["pharmacy"].toString()
+                        ),
 
 
-            )
+
+                        int.parse(
+                            quantity.text
+                        ),
 
 
 
-          ],
+                        DateTime.now()
+
+                            .add(
+
+                            const Duration(days:2)
+
+                        )
+
+                            .toIso8601String(),
 
 
-        );
+                      );
 
 
-      }
+
+                      Navigator.pop(context);
+
+
+
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(
+
+                          const SnackBar(
+
+                            content:
+                            Text(
+                                "Reservation sent"
+                            ),
+
+                            backgroundColor:
+                            Colors.green,
+
+                          )
+
+                      );
+
+
+                    }
+
+                    catch(e){
+
+
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(
+
+                          SnackBar(
+
+                            content:
+                            Text(
+                                e.toString()
+                            ),
+
+                          )
+
+                      );
+
+
+                    }
+
+
+
+                  }
+
+              )
+
+
+
+            ],
+
+
+
+          );
+
+
+        }
 
     );
 
 
-
   }
+
+
 
 
 
@@ -358,12 +759,15 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
       appBar:
+
       AppBar(
 
         title:
         const Text(
-          "Medicines"
+            "Available Medicines"
         ),
+
+        centerTitle:true,
 
       ),
 
@@ -375,18 +779,18 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
       loading
 
-      ?
+          ?
 
       const Center(
 
         child:
-        CircularProgressIndicator()
+        CircularProgressIndicator(),
 
       )
 
 
+          :
 
-      :
 
       Column(
 
@@ -400,8 +804,11 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             const EdgeInsets.all(15),
 
 
+
             child:
+
             TextField(
+
 
               controller:
               searchController,
@@ -412,31 +819,32 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
               decoration:
-              InputDecoration(
 
+              InputDecoration(
 
                 hintText:
                 "Search medicine...",
 
 
                 prefixIcon:
-                const Icon(
-                  Icons.search
-                ),
+                const Icon(Icons.search),
+
 
 
                 border:
+
                 OutlineInputBorder(
 
                   borderRadius:
-                  BorderRadius.circular(15)
+                  BorderRadius.circular(15),
 
-                )
+                ),
 
               ),
 
 
             ),
+
 
           ),
 
@@ -446,8 +854,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
           Expanded(
 
-
             child:
+
             ListView.builder(
 
 
@@ -456,7 +864,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
               itemBuilder:(context,index){
-
 
 
                 final medicine =
@@ -471,34 +878,59 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   const EdgeInsets.all(10),
 
 
+                  elevation:4,
+
+
 
                   child:
+
                   ListTile(
 
 
 
                     leading:
-                    const Icon(
 
-                      Icons.medication,
+                    const CircleAvatar(
 
-                      color:
-                      Colors.blue,
+                      backgroundColor:
+                      Color(0xff0A66FF),
+
+
+                      child:
+                      Icon(
+
+                        Icons.medication,
+
+                        color:
+                        Colors.white,
+
+                      ),
 
                     ),
 
 
 
                     title:
+
                     Text(
 
-                      medicine["product_name"]
+                      medicine["product_name"],
+
+
+                      style:
+                      const TextStyle(
+
+                        fontWeight:
+                        FontWeight.bold,
+
+                      ),
 
                     ),
 
 
 
                     subtitle:
+
                     Column(
 
                       crossAxisAlignment:
@@ -508,80 +940,71 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                       children:[
 
 
+
                         Text(
 
-                          medicine["pharmacy_name"]
+                          "${medicine["pharmacies"].length} pharmacies available",
 
                         ),
 
 
 
-                        Text(
 
-                          medicine["pharmacy_location"]
+                        const SizedBox(height:5),
 
-                        ),
 
 
 
                         Text(
 
-                          medicine["prescription"]
+                          medicine["prescription"] == true
 
-                          ?
+                              ?
 
-                          "Prescription Required"
+                          "🔴 Prescription Required"
 
-                          :
+                              :
 
-                          "No Prescription"
+                          "🟢 No Prescription",
+
 
                         ),
 
 
                       ],
 
+
                     ),
+
 
 
 
 
                     trailing:
-                    ElevatedButton(
 
+                    const Icon(
 
-                      child:
-                      const Text(
-                        "Reserve"
-                      ),
-
-
-
-                      onPressed:(){
-
-                        reserveDialog(
-                          medicine
-                        );
-
-                      },
-
+                      Icons.arrow_forward_ios,
 
                     ),
 
 
 
-                   
 
 
-                    onTap: () {
-                      openMap(
-                        (medicine["latitude"] as num).toDouble(),
-                        (medicine["longitude"] as num).toDouble(),
+                    onTap:(){
+
+
+                      showPharmacies(
+                          medicine
                       );
+
+
                     },
 
 
                   ),
+
 
 
                 );
@@ -606,7 +1029,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
 
   }
-
 
 
 }
