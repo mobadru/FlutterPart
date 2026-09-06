@@ -7,7 +7,7 @@ class ApiService {
 
 
   static const String baseUrl =
-      "http://10.27.190.55:8000/api";
+      "http://172.20.10.4:8000/api";
 
 
   // ==========================
@@ -227,6 +227,60 @@ response.body
 
 }
 
+
+}
+
+
+static Future<Map<String,dynamic>> changePassword(
+String currentPassword,
+String newPassword,
+String confirmPassword,
+) async {
+
+
+final url = Uri.parse(
+  "$baseUrl/change-password/"
+);
+
+
+final token = await getToken();
+
+
+final response = await http.post(
+
+url,
+
+headers:{
+
+"Content-Type":"application/json",
+
+"Authorization":"Bearer $token"
+
+},
+
+
+body:jsonEncode({
+
+"current_password":currentPassword,
+
+"new_password":newPassword,
+
+"confirm_password":confirmPassword
+
+}),
+
+
+);
+
+
+if(response.statusCode == 200){
+
+return jsonDecode(response.body);
+
+}
+
+
+throw Exception(response.body);
 
 }
 
@@ -554,6 +608,55 @@ static Future<Map<String,dynamic>> getProfile() async {
 
   }
 
+
+}
+
+
+static Future<Map<String,dynamic>> updateProfile(
+String email,
+String phone,
+String address,
+String gender,
+String? dateOfBirth,
+) async {
+
+
+final url = Uri.parse(
+  "$baseUrl/profile/"
+);
+
+
+final token = await getToken();
+
+
+final response = await http.patch(
+
+url,
+
+headers: {
+  "Content-Type":"application/json",
+  "Authorization":"Bearer $token",
+},
+
+
+body: jsonEncode({
+  "email": email,
+  "phone": phone,
+  "address": address,
+  "gender": gender,
+  "date_of_birth": dateOfBirth,
+}),
+
+
+);
+
+
+if(response.statusCode == 200){
+  return jsonDecode(response.body);
+}
+
+
+throw Exception(response.body);
 
 }
 
